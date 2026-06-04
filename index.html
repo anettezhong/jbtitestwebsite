@@ -1,0 +1,282 @@
+cat > /mnt/user-data/outputs/jbti_test.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JBTI 集运行为类型测试</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #FDFAF3;
+  --cream-mid: #F5EFD8;
+  --cream-border: #E8DFC0;
+  --warm-dark: #7A5C2E;
+  --warm-btn: #8B4A1A;
+  --warm-btn-hover: #6F3812;
+  --warm-accent: #E8A84A;
+  --warm-orange: #C8852A;
+  --warm-orange-hover: #B0721F;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+body { font-family: var(--font-sans); background: var(--cream); }
+.wrap { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; background: var(--cream); min-height: 100vh; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.hero { text-align: center; padding: 2rem 1rem; }
+.badge { display: inline-block; background: var(--cream-mid); border: 0.5px solid var(--cream-border); border-radius: 999px; font-size: 12px; color: var(--warm-dark); padding: 4px 14px; margin-bottom: 1rem; letter-spacing: 0.05em; }
+.hero h1 { font-size: 26px; font-weight: 500; color: #3D2E10; margin-bottom: 0.5rem; line-height: 1.3; }
+.hero p { font-size: 15px; color: #7A6240; line-height: 1.6; margin-bottom: 1.5rem; }
+.dims { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; text-align: left; }
+.dim { background: var(--cream-mid); border-radius: var(--border-radius-md); padding: 10px 12px; font-size: 13px; color: #7A6240; border: 0.5px solid var(--cream-border); }
+.dim strong { display: block; font-size: 12px; font-weight: 500; color: #3D2E10; margin-bottom: 2px; }
+.start-btn { width: 100%; padding: 14px; background: var(--warm-btn); color: #FFF8EE; border: none; border-radius: var(--border-radius-lg); font-size: 16px; font-weight: 500; cursor: pointer; }
+.start-btn:hover { background: var(--warm-btn-hover); }
+
+.q-header { margin-bottom: 1.25rem; }
+.progress-bar { height: 4px; background: var(--cream-border); border-radius: 2px; margin-bottom: 1rem; }
+.progress-fill { height: 100%; background: var(--warm-orange); border-radius: 2px; transition: width 0.3s ease; }
+.q-meta { margin-bottom: 0.75rem; }
+.q-num { font-size: 12px; color: #7A6240; }
+.q-text { font-size: 17px; font-weight: 500; color: #3D2E10; line-height: 1.45; }
+
+.options { display: flex; flex-direction: column; gap: 10px; margin-top: 1.25rem; }
+.opt { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--cream); border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-lg); cursor: pointer; transition: border-color 0.15s, background 0.15s; text-align: left; width: 100%; }
+.opt:hover { border-color: var(--warm-accent); background: var(--cream-mid); }
+.opt.selected { border: 1.5px solid var(--warm-orange); background: var(--cream-mid); }
+.opt-letter { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--cream-border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #7A6240; flex-shrink: 0; }
+.opt.selected .opt-letter { background: var(--warm-orange); color: #FFF8EE; border-color: var(--warm-orange); }
+.opt-txt { font-size: 14px; color: #3D2E10; line-height: 1.5; padding-top: 2px; }
+
+.nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; gap: 10px; }
+.prev-btn { padding: 12px 22px; background: transparent; color: #7A6240; border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; }
+.prev-btn:hover { border-color: var(--warm-orange); color: var(--warm-orange); }
+.prev-btn:disabled { opacity: 0.3; pointer-events: none; }
+.next-btn { padding: 12px 28px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; opacity: 0.35; pointer-events: none; }
+.next-btn.ready { opacity: 1; pointer-events: auto; }
+.next-btn.ready:hover { background: var(--warm-orange-hover); }
+
+.result { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.result-hero { text-align: center; padding: 1.5rem 1rem 1rem; }
+.result-emoji { font-size: 56px; margin-bottom: 0.75rem; }
+.result-title { font-size: 22px; font-weight: 500; color: #3D2E10; margin-bottom: 4px; }
+.result-sub { font-size: 13px; color: #7A6240; margin-bottom: 1rem; }
+.result-quote { font-size: 14px; color: #7A6240; font-style: italic; background: var(--cream-mid); border-left: 3px solid var(--warm-accent); padding: 10px 14px; text-align: left; margin-bottom: 1.25rem; }
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+.pc-card { background: var(--cream-mid); border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.pc-label { font-size: 11px; font-weight: 500; letter-spacing: 0.05em; margin-bottom: 6px; }
+.pc-label.pro { color: #3B6D11; }
+.pc-label.con { color: #993C1D; }
+.pc-text { font-size: 13px; color: #7A6240; line-height: 1.5; }
+.tip-card { background: var(--cream-mid); border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-lg); padding: 14px 16px; margin-bottom: 1.25rem; }
+.tip-label { font-size: 11px; font-weight: 500; color: #7A6240; letter-spacing: 0.05em; margin-bottom: 6px; }
+.tip-text { font-size: 13px; color: #3D2E10; line-height: 1.6; }
+.hook { background: var(--cream-mid); border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); padding: 12px 14px; font-size: 13px; color: #7A6240; margin-bottom: 1.25rem; text-align: center; }
+.retake { width: 100%; padding: 12px; background: transparent; border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); font-size: 14px; color: #7A6240; cursor: pointer; margin-bottom: 0.5rem; }
+.retake:hover { border-color: var(--warm-orange); color: var(--warm-orange); }
+.share-btn { width: 100%; padding: 12px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; }
+.share-btn:hover { background: var(--warm-orange-hover); }
+.axis-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+.axis-pill { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 500; border: 0.5px solid; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="screen active" id="s-intro">
+    <div class="hero">
+      <div class="badge">JBTI · 集运行为类型指标</div>
+      <h1>你是哪种集运人格？</h1>
+      <p>6道题，60秒，测出你的集运行为类型——精算师、甩手侠、囤积怪、焦虑宝、急先锋还是细节控？</p>
+      <div class="dims">
+        <div class="dim"><strong>决策依据</strong>数据派 S ↔ 感觉派 F</div>
+        <div class="dim"><strong>风险态度</strong>保守派 C ↔ 激进派 A</div>
+        <div class="dim"><strong>操作习惯</strong>规划派 P ↔ 随机派 R</div>
+        <div class="dim"><strong>情感连接</strong>任务型 T ↔ 情感型 E</div>
+      </div>
+      <button class="start-btn" onclick="startTest()">开始测试 →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s-quiz">
+    <div class="q-header">
+      <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+      <div class="q-meta"><span class="q-num" id="q-num">第 1 题 / 共 6 题</span></div>
+      <div class="q-text" id="q-text"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="nav">
+      <button class="prev-btn" id="prev-btn" onclick="prevQ()" disabled>← 上一题</button>
+      <button class="next-btn" id="next-btn" onclick="nextQ()">下一题</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s-result">
+    <div class="result" id="result-content"></div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  { text: "准备从国内寄东西到美国，你第一步会做什么？", opts: [
+    { label: "打开几家集运公司的报价单，对比单价和体积重系数", scores: { S: 2 } },
+    { label: "问朋友用过哪家，或者刷小红书/抖音看推荐", scores: { F: 2 } },
+    { label: "先把想买的东西全部加购物车，凑够一箱再说", scores: { R: 2 } },
+    { label: "先查海关政策，确认东西能不能寄、会不会被税", scores: { C: 2 } }
+  ]},
+  { text: "关于运费，你的态度更接近？", opts: [
+    { label: "花时间算清楚每一分钱，不接受任何隐藏收费", scores: { S: 2, C: 1 } },
+    { label: "差不多就行，别太离谱都可以接受", scores: { F: 2, A: 1 } },
+    { label: "只要能多寄点东西，运费贵一点也能接受", scores: { E: 2 } },
+    { label: "贵可以，但必须稳，丢件赔款要写清楚", scores: { C: 2 } }
+  ]},
+  { text: "你的集运包裹通常会在集运仓放多久？", opts: [
+    { label: "买到就马上寄，一天都不等", scores: { R: 2, A: 1 } },
+    { label: "等所有东西到齐再一起发，一般不超过2周", scores: { P: 2 } },
+    { label: "会放1到3个月，等有更多东西再一起寄", scores: { E: 2, P: 1 } },
+    { label: "看心情，有时候囤有时候不囤", scores: { F: 2 } }
+  ]},
+  { text: "收到包裹后，你第一件事是？", opts: [
+    { label: "称重并核对收费是否一致", scores: { S: 2 } },
+    { label: "开心拆箱，拍照发朋友圈/小红书", scores: { E: 2 } },
+    { label: "检查物品有无破损，有问题马上联系客服", scores: { C: 2 } },
+    { label: "拆完就扔一边，懒得检查", scores: { T: 2, A: 1 } }
+  ]},
+  { text: "有一家新集运公司，价格比你现在用的便宜30%，但网上没什么评价，你会？", opts: [
+    { label: "先把体积重、附加费全问清楚再决定", scores: { S: 2, C: 1 } },
+    { label: "直接试一单，反正不贵", scores: { A: 2 } },
+    { label: "等朋友先试，或者等更多评价出来再说", scores: { F: 2, C: 1 } },
+    { label: "不敢试，还是用老牌子放心", scores: { C: 2 } }
+  ]},
+  { text: "集运过程中，你最不能忍受的是？", opts: [
+    { label: "报价单上有隐藏收费，发货前才告诉你", scores: { S: 2 } },
+    { label: "客服已读不回，问问题没人理", scores: { E: 2 } },
+    { label: "包裹丢了或坏了，找不到人赔", scores: { C: 2 } },
+    { label: "寄了快两个月才到，等到忘记买了啥", scores: { R: 1, E: 1, A: 1 } }
+  ]}
+];
+
+const personalities = {
+  "精算师": { emoji:"🔢", title:"精算师", sub:"人形计算器 · 省钱公务员 · Excel艺术家", quote:"每一克都要花得明明白白", pro:"永远不会被体积重坑，运费性价比最高", con:"容易因纠结错过好价，耗时耗力", tip:"我们提供报价单全透明 + 体积重/6000 + 免费合箱拆盒，省下你算数的时间。", hook:"📩 私信【精算师】领一份《集运比价模板》", axes:[{label:"S 数据派",c:"#E6F1FB",tc:"#0C447C",bc:"#85B7EB"},{label:"C 保守派",c:"#E1F5EE",tc:"#085041",bc:"#5DCAA5"},{label:"P 规划派",c:"#EEEDFE",tc:"#3C3489",bc:"#AFA9EC"},{label:"T 任务型",c:"#F1EFE8",tc:"#444441",bc:"#B4B2A9"}] },
+  "甩手侠": { emoji:"🤝", title:"甩手侠", sub:"散财童子 · 佛系买家 · 甩手掌柜", quote:"你帮我搞定就行，贵点无所谓", pro:"决策快，不内耗，省时间", con:"容易被隐藏收费坑，事后才反应过来", tip:"我们提供全包服务 + 一键代发 + 客服秒回，报价单没有小字陷阱。", hook:"📩 私信【甩手侠】领一张《集运避坑清单》", axes:[{label:"F 感觉派",c:"#FBEAF0",tc:"#72243E",bc:"#ED93B1"},{label:"A 激进派",c:"#FAECE7",tc:"#712B13",bc:"#F0997B"},{label:"R 随机派",c:"#FAEEDA",tc:"#633806",bc:"#EF9F27"},{label:"E 情感型",c:"#EEEDFE",tc:"#3C3489",bc:"#AFA9EC"}] },
+  "囤积怪": { emoji:"🐹", title:"囤积怪", sub:"仓鼠成精 · 未来学家 · 收藏家", quote:"这个以后用得上，先买着", pro:"一次寄一大箱，摊薄运费，拆箱快乐拉满", con:"仓储超期被收费，东西放太久忘记寄", tip:"我们提供90天免租仓储 + 打包拍照 + 到期提醒，让你囤得安心。", hook:"📩 私信【囤积怪】查查你的仓储免租期还剩几天", axes:[{label:"F 感觉派",c:"#FBEAF0",tc:"#72243E",bc:"#ED93B1"},{label:"A 激进派",c:"#FAECE7",tc:"#712B13",bc:"#F0997B"},{label:"P 规划派",c:"#EEEDFE",tc:"#3C3489",bc:"#AFA9EC"},{label:"E 情感型",c:"#E1F5EE",tc:"#085041",bc:"#5DCAA5"}] },
+  "焦虑宝": { emoji:"😰", title:"焦虑宝", sub:"戏精本精 · 心跳玩家 · 物流跟踪器", quote:"会不会被海关扣啊？要不要买保险？", pro:"包裹安全性最高，很少出问题", con:"心累，每次集运像渡劫", tip:"我们提供全程物流跟踪 + 清关状态实时同步 + 破损包赔承诺，客服随时在线安抚你。", hook:"📩 私信【焦虑宝】领一份《海关通关安心指南》", axes:[{label:"S 数据派",c:"#E6F1FB",tc:"#0C447C",bc:"#85B7EB"},{label:"C 保守派",c:"#E1F5EE",tc:"#085041",bc:"#5DCAA5"},{label:"R 随机派",c:"#FAEEDA",tc:"#633806",bc:"#EF9F27"},{label:"E 情感型",c:"#EEEDFE",tc:"#3C3489",bc:"#AFA9EC"}] },
+  "急先锋": { emoji:"⚡", title:"急先锋", sub:"闪电侠 · 等不了 · 加钱居士", quote:"现在就要，加钱也行", pro:"时效最快，想寄就寄，不拖沓", con:"运费最高，可能多花冤枉钱", tip:"我们提供美森快船 / 空运限时达 + 时效承诺 + 加急处理通道，快且不坑。", hook:"📩 私信【急先锋】查一下今天的空运报价", axes:[{label:"F 感觉派",c:"#FBEAF0",tc:"#72243E",bc:"#ED93B1"},{label:"A 激进派",c:"#FAECE7",tc:"#712B13",bc:"#F0997B"},{label:"R 随机派",c:"#FAEEDA",tc:"#633806",bc:"#EF9F27"},{label:"T 任务型",c:"#F1EFE8",tc:"#444441",bc:"#B4B2A9"}] },
+  "细节控": { emoji:"🔍", title:"细节控", sub:"显微镜 · 质检员 · 强迫症晚期", quote:"每一件都要拍照确认，我才能放心", pro:"包裹极少出错，清关通过率高", con:"沟通成本高，自己累客服也累", tip:"我们提供逐件拍照 + 打包视频 + 个性化申报，耐心客服陪你抠细节。", hook:"📩 私信【细节控】领一份《物品申报模板》", axes:[{label:"S 数据派",c:"#E6F1FB",tc:"#0C447C",bc:"#85B7EB"},{label:"C 保守派",c:"#E1F5EE",tc:"#085041",bc:"#5DCAA5"},{label:"P 规划派",c:"#EEEDFE",tc:"#3C3489",bc:"#AFA9EC"},{label:"E 情感型",c:"#FAEEDA",tc:"#633806",bc:"#EF9F27"}] }
+};
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let scores = { S:0,F:0,C:0,A:0,P:0,R:0,T:0,E:0 };
+
+function startTest() {
+  document.getElementById('s-intro').classList.remove('active');
+  document.getElementById('s-quiz').classList.add('active');
+  renderQ();
+}
+
+function renderQ() {
+  const q = questions[current];
+  document.getElementById('q-num').textContent = `第 ${current+1} 题 / 共 ${questions.length} 题`;
+  document.getElementById('progress').style.width = ((current / questions.length) * 100) + '%';
+  document.getElementById('q-text').textContent = q.text;
+
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  prevBtn.disabled = current === 0;
+  nextBtn.textContent = current === questions.length - 1 ? '查看结果' : '下一题';
+
+  const saved = answers[current];
+  nextBtn.classList.toggle('ready', saved !== null);
+
+  const letters = ['A','B','C','D'];
+  document.getElementById('options').innerHTML = q.opts.map((o, i) =>
+    `<button class="opt${saved === i ? ' selected' : ''}" onclick="selectOpt(${i})">
+      <div class="opt-letter">${letters[i]}</div>
+      <div class="opt-txt">${o.label}</div>
+    </button>`
+  ).join('');
+}
+
+function selectOpt(i) {
+  answers[current] = i;
+  document.querySelectorAll('.opt').forEach((el, idx) => el.classList.toggle('selected', idx === i));
+  document.getElementById('next-btn').classList.add('ready');
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+function nextQ() {
+  if (answers[current] === null) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQ();
+  } else {
+    calcAndShow();
+  }
+}
+
+function calcAndShow() {
+  scores = { S:0,F:0,C:0,A:0,P:0,R:0,T:0,E:0 };
+  answers.forEach((ans, qi) => {
+    if (ans !== null) {
+      Object.keys(questions[qi].opts[ans].scores).forEach(k => scores[k] += questions[qi].opts[ans].scores[k]);
+    }
+  });
+  showResult();
+}
+
+function calcPersonality() {
+  const isS=scores.S>=scores.F, isC=scores.C>=scores.A, isP=scores.P>=scores.R, isE=scores.E>=scores.T;
+  if(isS&&isC&&isP&&!isE) return"精算师";
+  if(!isS&&!isC&&!isP&&isE) return"甩手侠";
+  if(!isS&&!isC&&isP&&isE) return"囤积怪";
+  if(isS&&isC&&!isP&&isE) return"焦虑宝";
+  if(!isS&&!isC&&!isP&&!isE) return"急先锋";
+  if(isS&&isC&&isP&&isE) return"细节控";
+  const c={"精算师":scores.S+scores.C+scores.P+scores.T,"甩手侠":scores.F+scores.A+scores.R+scores.E,"囤积怪":scores.F+scores.A+scores.P+scores.E,"焦虑宝":scores.S+scores.C+scores.R+scores.E,"急先锋":scores.F+scores.A+scores.R+scores.T,"细节控":scores.S+scores.C+scores.P+scores.E};
+  return Object.keys(c).reduce((a,b)=>c[a]>=c[b]?a:b);
+}
+
+function showResult() {
+  const name = calcPersonality(), p = personalities[name];
+  document.getElementById('s-quiz').classList.remove('active');
+  document.getElementById('s-result').classList.add('active');
+  const axisHtml = p.axes.map(a=>`<span class="axis-pill" style="background:${a.c};color:${a.tc};border-color:${a.bc}">${a.label}</span>`).join('');
+  document.getElementById('result-content').innerHTML = `
+    <div class="result">
+      <div class="result-hero">
+        <div class="result-emoji">${p.emoji}</div>
+        <div class="result-title">${p.title}</div>
+        <div class="result-sub">${p.sub}</div>
+        <div class="axis-row" style="justify-content:center">${axisHtml}</div>
+      </div>
+      <div class="result-quote">"${p.quote}"</div>
+      <div class="pros-cons">
+        <div class="pc-card"><div class="pc-label pro">✅ 优点</div><div class="pc-text">${p.pro}</div></div>
+        <div class="pc-card"><div class="pc-label con">❌ 缺点</div><div class="pc-text">${p.con}</div></div>
+      </div>
+      <div class="tip-card"><div class="tip-label">💡 给你的专属建议</div><div class="tip-text">${p.tip}</div></div>
+      <div class="hook">${p.hook}</div>
+      <button class="share-btn" onclick="alert('分享结果：我的JBTI集运人格是「' + p.title + '」' + p.emoji + '——' + p.sub)">分享结果 · @ 你的集运搭子来测 →</button>
+      <br><br>
+      <button class="retake" onclick="retake()">重新测试</button>
+    </div>`;
+}
+
+function retake() {
+  current = 0; answers = new Array(questions.length).fill(null); scores = { S:0,F:0,C:0,A:0,P:0,R:0,T:0,E:0 };
+  document.getElementById('s-result').classList.remove('active');
+  document.getElementById('s-intro').classList.add('active');
+}
+</script>
+</body>
+</html>
+HTMLEOF
+echo "done"
