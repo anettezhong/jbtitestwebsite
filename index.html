@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>JBTI 集运行为类型测试</title>
+<title>JBTI 集运行为类型测试 · 诺亚方舟国际物流</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -21,18 +21,38 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 body { font-family: var(--font-sans); background: var(--cream); }
-.wrap { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; background: var(--cream); min-height: 100vh; }
-.screen { display: none; }
+.wrap { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; background: var(--cream); min-height: 100vh; display: flex; flex-direction: column; }
+.screen { display: none; flex: 1; }
 .screen.active { display: block; }
 
-.hero { text-align: center; padding: 2rem 1rem; }
+/* 底部品牌始终可见 */
+.footer-brand {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  text-align: center;
+  font-size: 11px;
+  color: #9B8A6F;
+  border-top: 0.5px solid var(--cream-border);
+  letter-spacing: 0.3px;
+}
+.footer-brand .brand-name {
+  font-weight: 500;
+  color: #7A6240;
+}
+.footer-brand .slogan {
+  font-size: 10px;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+.hero { text-align: center; padding: 1rem 1rem 2rem; }
 .badge { display: inline-block; background: var(--cream-mid); border: 0.5px solid var(--cream-border); border-radius: 999px; font-size: 12px; color: var(--warm-dark); padding: 4px 14px; margin-bottom: 1rem; letter-spacing: 0.05em; }
 .hero h1 { font-size: 26px; font-weight: 500; color: #3D2E10; margin-bottom: 0.5rem; line-height: 1.3; }
 .hero p { font-size: 15px; color: #7A6240; line-height: 1.6; margin-bottom: 1.5rem; }
 .dims { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.5rem; text-align: left; }
 .dim { background: var(--cream-mid); border-radius: var(--border-radius-md); padding: 10px 12px; font-size: 13px; color: #7A6240; border: 0.5px solid var(--cream-border); }
 .dim strong { display: block; font-size: 12px; font-weight: 500; color: #3D2E10; margin-bottom: 2px; }
-.start-btn { width: 100%; padding: 14px; background: var(--warm-btn); color: #FFF8EE; border: none; border-radius: var(--border-radius-lg); font-size: 16px; font-weight: 500; cursor: pointer; }
+.start-btn { width: 100%; padding: 14px; background: var(--warm-btn); color: #FFF8EE; border: none; border-radius: var(--border-radius-lg); font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
 .start-btn:hover { background: var(--warm-btn-hover); }
 
 .q-header { margin-bottom: 1.25rem; }
@@ -54,7 +74,7 @@ body { font-family: var(--font-sans); background: var(--cream); }
 .prev-btn { padding: 12px 22px; background: transparent; color: #7A6240; border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; }
 .prev-btn:hover { border-color: var(--warm-orange); color: var(--warm-orange); }
 .prev-btn:disabled { opacity: 0.3; pointer-events: none; }
-.next-btn { padding: 12px 28px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; opacity: 0.35; pointer-events: none; }
+.next-btn { padding: 12px 28px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; opacity: 0.35; pointer-events: none; transition: opacity 0.2s, background 0.2s; }
 .next-btn.ready { opacity: 1; pointer-events: auto; }
 .next-btn.ready:hover { background: var(--warm-orange-hover); }
 
@@ -75,18 +95,21 @@ body { font-family: var(--font-sans); background: var(--cream); }
 .tip-label { font-size: 11px; font-weight: 500; color: #7A6240; letter-spacing: 0.05em; margin-bottom: 6px; }
 .tip-text { font-size: 13px; color: #3D2E10; line-height: 1.6; }
 .hook { background: var(--cream-mid); border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); padding: 12px 14px; font-size: 13px; color: #7A6240; margin-bottom: 1.25rem; text-align: center; }
-.retake { width: 100%; padding: 12px; background: transparent; border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); font-size: 14px; color: #7A6240; cursor: pointer; margin-bottom: 0.5rem; }
+.retake { width: 100%; padding: 12px; background: transparent; border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); font-size: 14px; color: #7A6240; cursor: pointer; margin-bottom: 0.5rem; transition: all 0.2s; }
 .retake:hover { border-color: var(--warm-orange); color: var(--warm-orange); }
-.share-btn { width: 100%; padding: 12px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.share-btn { width: 100%; padding: 12px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .share-btn:hover { background: var(--warm-orange-hover); }
 .axis-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
 .axis-pill { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 500; border: 0.5px solid; }
-.toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 40px; font-size: 13px; z-index: 1000; white-space: nowrap; backdrop-filter: blur(4px); pointer-events: none; }
+
+.toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 8px 20px; border-radius: 40px; font-size: 14px; z-index: 1000; white-space: nowrap; backdrop-filter: blur(6px); pointer-events: none; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+@media (max-width: 560px) { .toast-msg { white-space: normal; max-width: 80%; text-align: center; line-height: 1.4; } }
 </style>
 </head>
 <body>
 
 <div class="wrap">
+  <!-- 主屏幕区域 -->
   <div class="screen active" id="s-intro">
     <div class="hero">
       <div class="badge">JBTI · 集运行为类型指标</div>
@@ -117,6 +140,12 @@ body { font-family: var(--font-sans); background: var(--cream); }
 
   <div class="screen" id="s-result">
     <div class="result" id="result-content"></div>
+  </div>
+
+  <!-- 底部品牌信息（所有页面可见） -->
+  <div class="footer-brand">
+    <div class="brand-name">诺亚方舟国际物流 · Ark Global Logistics</div>
+    <div class="slogan">—— 承载使命，信实必达 ——</div>
   </div>
 </div>
 
@@ -172,10 +201,49 @@ const personalities = {
 let current = 0;
 let answers = new Array(questions.length).fill(null);
 let scores = { S:0,F:0,C:0,A:0,P:0,R:0,T:0,E:0 };
-let currentPersonalityKey = "精算师"; // 存储最新结果
+let currentPersonalityKey = "精算师";
 
-// 辅助显示toast提示
-function showToast(msg, duration = 2000) {
+// 获取当前测试页面的完整URL（供分享用）
+function getShareUrl() {
+  return window.location.href;
+}
+
+// 增强型复制到剪贴板（兼容微信）
+function copyToClipboard(text, showToastMsg = "✅ 已复制分享文案，快去粘贴给好友吧！") {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(showToastMsg);
+    }).catch(err => {
+      console.warn('clipboard write failed, fallback', err);
+      fallbackTextareaCopy(text, showToastMsg);
+    });
+  } else {
+    fallbackTextareaCopy(text, showToastMsg);
+  }
+}
+
+function fallbackTextareaCopy(text, successMsg) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.top = '-9999px';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, text.length);
+  let success = false;
+  try {
+    success = document.execCommand('copy');
+  } catch (err) { console.warn(err); }
+  document.body.removeChild(textarea);
+  if (success) {
+    showToast(successMsg);
+  } else {
+    alert('📋 复制失败，请长按上方结果文字手动复制分享~\n\n' + text);
+  }
+}
+
+function showToast(msg, duration = 2200) {
   let toast = document.querySelector('.toast-msg');
   if (!toast) {
     toast = document.createElement('div');
@@ -184,52 +252,48 @@ function showToast(msg, duration = 2000) {
   }
   toast.textContent = msg;
   toast.style.opacity = '1';
-  setTimeout(() => {
-    toast.style.opacity = '0';
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => {
+    if (toast) toast.style.opacity = '0';
   }, duration);
 }
 
-// 真正的分享功能：优先 Web Share，降级复制到剪贴板
+function isWechat() {
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.indexOf('micromessenger') !== -1;
+}
+
+// 分享结果：生成包含人格结果 + 品牌 + 网址的分享文案
 window.shareResult = function() {
   const p = personalities[currentPersonalityKey];
   if (!p) return;
-  // 构造分享文案：生动有趣，适合聊天传播
-  const shareText = `🔢📦【JBTI集运人格测试】我是 ${p.title} ${p.emoji} —— ${p.sub}\n“${p.quote}”\n✨ 快来看看你的集运行为类型！复制这条消息，@你的集运搭子一起来测 👉  #集运人格 #海淘人集合`;
   
-  // 检测是否支持原生分享 (移动端)
+  const pageUrl = getShareUrl();
+  // 构造简洁有吸引力的分享内容，包含品牌口号与网址
+  const shareText = `🔢📦【JBTI集运人格测试】我是 ${p.title} ${p.emoji} —— ${p.sub}\n“${p.quote}”\n✨ 测测你的集运行为类型，@你的集运搭子一起来挑战！\n\n🚢 诺亚方舟国际物流 · Ark Global Logistics —— 承载使命，信实必达\n🔗 测试地址：${pageUrl}`;
+  
+  const isWeChatBrowser = isWechat();
+  
+  if (isWeChatBrowser) {
+    // 微信内直接复制文案（避免调用原生分享导致的错误）
+    copyToClipboard(shareText, '✅ 已复制结果 + 测试链接，快去微信粘贴给好友或发朋友圈吧！');
+    return;
+  }
+  
+  // 非微信环境，优先尝试 Web Share API
   if (navigator.share) {
     navigator.share({
       title: 'JBTI集运人格测试',
       text: shareText,
-      // 没有网址就不加url，避免无效
     }).catch(err => {
       if (err.name !== 'AbortError') {
-        // 用户取消不弹错，其他错误降级复制
-        fallbackCopy(shareText);
+        copyToClipboard(shareText, '✅ 已复制分享文案，快发给你的集运搭子');
       }
     });
   } else {
-    fallbackCopy(shareText);
+    copyToClipboard(shareText, '📋 复制成功！现在就可以把结果和链接分享给朋友啦');
   }
 };
-
-// 降级复制 + 友好提示
-function fallbackCopy(text) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('✅ 结果已复制，快去分享给集运搭子吧！');
-    }).catch(() => {
-      manualCopyFallback(text);
-    });
-  } else {
-    manualCopyFallback(text);
-  }
-}
-
-// 极少数情况复制失败，弹窗让用户手动复制
-function manualCopyFallback(text) {
-  alert('📋 无法自动复制，请长按选择复制下方内容：\n\n' + text);
-}
 
 function startTest() {
   document.getElementById('s-intro').classList.remove('active');
@@ -312,7 +376,6 @@ function calcPersonality() {
   if(!isS && !isC && !isP && !isE) return "急先锋";
   if(isS && isC && isP && isE) return "细节控";
   
-  // 保底分数优先
   const c = {
     "精算师": scores.S + scores.C + scores.P + scores.T,
     "甩手侠": scores.F + scores.A + scores.R + scores.E,
@@ -326,7 +389,7 @@ function calcPersonality() {
 
 function showResult() {
   const name = calcPersonality();
-  currentPersonalityKey = name;   // 存储给分享函数使用
+  currentPersonalityKey = name;
   const p = personalities[name];
   document.getElementById('s-quiz').classList.remove('active');
   document.getElementById('s-result').classList.add('active');
@@ -360,11 +423,6 @@ function retake() {
   document.getElementById('s-result').classList.remove('active');
   document.getElementById('s-intro').classList.add('active');
 }
-
-// 额外兜底：确保手机触摸反馈
-document.addEventListener('click', function(e) {
-  // 只做轻微 passive 处理，无副作用
-}, false);
 </script>
 </body>
 </html>
