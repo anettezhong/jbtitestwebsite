@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>JBTI 集运行为类型测试</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,10 +77,11 @@ body { font-family: var(--font-sans); background: var(--cream); }
 .hook { background: var(--cream-mid); border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); padding: 12px 14px; font-size: 13px; color: #7A6240; margin-bottom: 1.25rem; text-align: center; }
 .retake { width: 100%; padding: 12px; background: transparent; border: 0.5px solid var(--cream-border); border-radius: var(--border-radius-md); font-size: 14px; color: #7A6240; cursor: pointer; margin-bottom: 0.5rem; }
 .retake:hover { border-color: var(--warm-orange); color: var(--warm-orange); }
-.share-btn { width: 100%; padding: 12px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; }
+.share-btn { width: 100%; padding: 12px; background: var(--warm-orange); color: #FFF8EE; border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
 .share-btn:hover { background: var(--warm-orange-hover); }
 .axis-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
 .axis-pill { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 500; border: 0.5px solid; }
+.toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 40px; font-size: 13px; z-index: 1000; white-space: nowrap; backdrop-filter: blur(4px); pointer-events: none; }
 </style>
 </head>
 <body>
@@ -171,6 +172,64 @@ const personalities = {
 let current = 0;
 let answers = new Array(questions.length).fill(null);
 let scores = { S:0,F:0,C:0,A:0,P:0,R:0,T:0,E:0 };
+let currentPersonalityKey = "精算师"; // 存储最新结果
+
+// 辅助显示toast提示
+function showToast(msg, duration = 2000) {
+  let toast = document.querySelector('.toast-msg');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+  }, duration);
+}
+
+// 真正的分享功能：优先 Web Share，降级复制到剪贴板
+window.shareResult = function() {
+  const p = personalities[currentPersonalityKey];
+  if (!p) return;
+  // 构造分享文案：生动有趣，适合聊天传播
+  const shareText = `🔢📦【JBTI集运人格测试】我是 ${p.title} ${p.emoji} —— ${p.sub}\n“${p.quote}”\n✨ 快来看看你的集运行为类型！复制这条消息，@你的集运搭子一起来测 👉  #集运人格 #海淘人集合`;
+  
+  // 检测是否支持原生分享 (移动端)
+  if (navigator.share) {
+    navigator.share({
+      title: 'JBTI集运人格测试',
+      text: shareText,
+      // 没有网址就不加url，避免无效
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        // 用户取消不弹错，其他错误降级复制
+        fallbackCopy(shareText);
+      }
+    });
+  } else {
+    fallbackCopy(shareText);
+  }
+};
+
+// 降级复制 + 友好提示
+function fallbackCopy(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ 结果已复制，快去分享给集运搭子吧！');
+    }).catch(() => {
+      manualCopyFallback(text);
+    });
+  } else {
+    manualCopyFallback(text);
+  }
+}
+
+// 极少数情况复制失败，弹窗让用户手动复制
+function manualCopyFallback(text) {
+  alert('📋 无法自动复制，请长按选择复制下方内容：\n\n' + text);
+}
 
 function startTest() {
   document.getElementById('s-intro').classList.remove('active');
@@ -196,9 +255,18 @@ function renderQ() {
   document.getElementById('options').innerHTML = q.opts.map((o, i) =>
     `<button class="opt${saved === i ? ' selected' : ''}" onclick="selectOpt(${i})">
       <div class="opt-letter">${letters[i]}</div>
-      <div class="opt-txt">${o.label}</div>
+      <div class="opt-txt">${escapeHtml(o.label)}</div>
     </button>`
   ).join('');
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
 }
 
 function selectOpt(i) {
@@ -232,19 +300,34 @@ function calcAndShow() {
 }
 
 function calcPersonality() {
-  const isS=scores.S>=scores.F, isC=scores.C>=scores.A, isP=scores.P>=scores.R, isE=scores.E>=scores.T;
-  if(isS&&isC&&isP&&!isE) return"精算师";
-  if(!isS&&!isC&&!isP&&isE) return"甩手侠";
-  if(!isS&&!isC&&isP&&isE) return"囤积怪";
-  if(isS&&isC&&!isP&&isE) return"焦虑宝";
-  if(!isS&&!isC&&!isP&&!isE) return"急先锋";
-  if(isS&&isC&&isP&&isE) return"细节控";
-  const c={"精算师":scores.S+scores.C+scores.P+scores.T,"甩手侠":scores.F+scores.A+scores.R+scores.E,"囤积怪":scores.F+scores.A+scores.P+scores.E,"焦虑宝":scores.S+scores.C+scores.R+scores.E,"急先锋":scores.F+scores.A+scores.R+scores.T,"细节控":scores.S+scores.C+scores.P+scores.E};
-  return Object.keys(c).reduce((a,b)=>c[a]>=c[b]?a:b);
+  const isS = scores.S >= scores.F;
+  const isC = scores.C >= scores.A;
+  const isP = scores.P >= scores.R;
+  const isE = scores.E >= scores.T;
+  
+  if(isS && isC && isP && !isE) return "精算师";
+  if(!isS && !isC && !isP && isE) return "甩手侠";
+  if(!isS && !isC && isP && isE) return "囤积怪";
+  if(isS && isC && !isP && isE) return "焦虑宝";
+  if(!isS && !isC && !isP && !isE) return "急先锋";
+  if(isS && isC && isP && isE) return "细节控";
+  
+  // 保底分数优先
+  const c = {
+    "精算师": scores.S + scores.C + scores.P + scores.T,
+    "甩手侠": scores.F + scores.A + scores.R + scores.E,
+    "囤积怪": scores.F + scores.A + scores.P + scores.E,
+    "焦虑宝": scores.S + scores.C + scores.R + scores.E,
+    "急先锋": scores.F + scores.A + scores.R + scores.T,
+    "细节控": scores.S + scores.C + scores.P + scores.E
+  };
+  return Object.keys(c).reduce((a,b) => c[a] >= c[b] ? a : b);
 }
 
 function showResult() {
-  const name = calcPersonality(), p = personalities[name];
+  const name = calcPersonality();
+  currentPersonalityKey = name;   // 存储给分享函数使用
+  const p = personalities[name];
   document.getElementById('s-quiz').classList.remove('active');
   document.getElementById('s-result').classList.add('active');
   const axisHtml = p.axes.map(a=>`<span class="axis-pill" style="background:${a.c};color:${a.tc};border-color:${a.bc}">${a.label}</span>`).join('');
@@ -263,17 +346,25 @@ function showResult() {
       </div>
       <div class="tip-card"><div class="tip-label">💡 给你的专属建议</div><div class="tip-text">${p.tip}</div></div>
       <div class="hook">${p.hook}</div>
-      <button class="share-btn" onclick="alert('分享结果：我的JBTI集运人格是「' + p.title + '」' + p.emoji + '——' + p.sub)">分享结果 · @ 你的集运搭子来测 →</button>
+      <button class="share-btn" onclick="shareResult()">📤 分享结果 · @ 你的集运搭子来测 →</button>
       <br><br>
       <button class="retake" onclick="retake()">重新测试</button>
     </div>`;
 }
 
 function retake() {
-  current = 0; answers = new Array(questions.length).fill(null); scores = { S:0,F:0,C:0,A:0,P:0,R:0,T:0,E:0 };
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  scores = { S:0,F:0,C:0,A:0,P:0,R:0,T:0,E:0 };
+  currentPersonalityKey = "精算师";
   document.getElementById('s-result').classList.remove('active');
   document.getElementById('s-intro').classList.add('active');
 }
+
+// 额外兜底：确保手机触摸反馈
+document.addEventListener('click', function(e) {
+  // 只做轻微 passive 处理，无副作用
+}, false);
 </script>
 </body>
 </html>
